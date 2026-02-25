@@ -169,7 +169,7 @@ export function formatSqlError(error: unknown, sql?: string, database_id?: numbe
       if (response.data && typeof response.data === 'object') {
         // Handle Superset-specific error structure
         if (response.data.message) {
-          errorDetails += `Error Message: ${response.data.message}\n`;
+          errorDetails += `Error Message: ${formatObjectForDisplay(response.data.message)}\n`;
         }
         
         if (response.data.error_type) {
