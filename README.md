@@ -2,8 +2,6 @@
 
 A Model Context Protocol (MCP) server for managing Apache Superset datasets, metrics, and SQL queries.
 
-> 📖 [中文文档](README_zh.md)
-
 ## 🚀 Features
 
 - **Dataset Management**: Full CRUD operations for Superset datasets
@@ -66,18 +64,8 @@ Configure your Superset connection by updating the `env` section in the MCP conf
 }
 ```
 
-**Alternative: Using Access Token Command (recommended for Azure SSO/OAuth)**
-```json
-"env": {
-  "SUPERSET_BASE_URL": "your-superset-url",
-  "SUPERSET_ACCESS_TOKEN_COMMAND": "az account get-access-token --resource api://<your-superset-app-id-uri> --query accessToken -o tsv"
-}
-```
-
 Notes:
 - `SUPERSET_ACCESS_TOKEN` now works without requiring username/password.
-- `SUPERSET_ACCESS_TOKEN_COMMAND` is executed whenever the server needs a token.
-- If the command output starts with `Bearer `, the prefix is stripped automatically.
 
 **Alternative: Using Browser Session Cookie + CSRF Token**
 ```json
