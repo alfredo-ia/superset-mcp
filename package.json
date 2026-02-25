@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsc && chmod +x build/index.js",
+    "prepare": "npm run build",
     "dev": "tsc --watch",
     "start": "node build/index.js",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"
