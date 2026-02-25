@@ -24,6 +24,13 @@ export class BaseSuperset {
       this.config.accessToken = this.normalizeAccessToken(config.accessToken);
       this.accessTokenSource = 'static';
     }
+    if (config.sessionCookie?.trim()) {
+      this.config.sessionCookie = this.normalizeSessionCookie(config.sessionCookie);
+    }
+    if (config.csrfToken?.trim()) {
+      this.config.csrfToken = this.normalizeCsrfToken(config.csrfToken);
+      this.csrfToken = this.config.csrfToken;
+    }
 
     this.api = axios.create({
       baseURL: config.baseUrl,
@@ -62,6 +69,25 @@ export class BaseSuperset {
     return token.startsWith('Bearer ') ? token.slice(7).trim() : token;
   }
 
+  private normalizeSessionCookie(rawCookie: string): string {
+    const cookie = rawCookie.trim();
+    if (!cookie) {
+      throw new Error("Session cookie is empty");
+    }
+    if (cookie.includes("=") || cookie.includes(";")) {
+      return cookie;
+    }
+    return `session=${cookie}`;
+  }
+
+  private normalizeCsrfToken(rawToken: string): string {
+    const token = rawToken.trim();
+    if (!token) {
+      throw new Error("CSRF token is empty");
+    }
+    return token;
+  }
+
   private async loadAccessTokenFromCommand(): Promise<string | undefined> {
     const tokenCommand = this.config.accessTokenCommand?.trim();
     if (!tokenCommand) {
@@ -90,6 +116,13 @@ export class BaseSuperset {
       if (this.config.accessToken) {
         config.headers.Authorization = `Bearer ${this.config.accessToken}`;
       }
+      if (this.config.sessionCookie) {
+        config.headers.Cookie = this.config.sessionCookie;
+      }
+      if (this.csrfToken) {
+        config.headers['X-CSRFToken'] = this.csrfToken;
+      }
+      config.headers.Referer = this.config.baseUrl;
       return config;
     });
 
@@ -205,8 +238,16 @@ export class BaseSuperset {
       return;
     }
 
+    if (this.config.sessionCookie) {
+      this.isAuthenticated = true;
+      if (this.config.csrfToken) {
+        this.csrfToken = this.config.csrfToken;
+      }
+      return;
+    }
+
     if (!this.config.username || !this.config.password) {
-      throw new Error("Username and password or access token required");
+      throw new Error("Username and password, access token, access token command, or session cookie required");
     }
 
     try {
@@ -234,9 +275,9 @@ export class BaseSuperset {
     try {
       const response = await this.api.get('/api/v1/security/csrf_token/');
       const token = response.data.result;
-      const sessionCookie = response.headers['set-cookie']?.find((cookie: string) => 
+      const sessionCookie = response.headers['set-cookie']?.find((cookie: string) =>
         cookie.startsWith('session=')
-      )?.split(';')[0]?.split('=')[1] || '';
+      )?.split(';')[0] || this.config.sessionCookie || '';
       
       this.csrfToken = token;
       return { token, sessionCookie };
@@ -254,6 +295,9 @@ export class BaseSuperset {
 
   // Ensure CSRF token exists
   private async ensureCsrfToken(): Promise<CsrfTokenResponse> {
+    if (this.csrfToken && this.config.sessionCookie && !this.config.accessToken) {
+      return { token: this.csrfToken, sessionCookie: this.config.sessionCookie };
+    }
     if (!this.csrfToken) {
       return await this.getCsrfToken();
     }
@@ -272,7 +316,6 @@ export class BaseSuperset {
       timeout: 120000,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.config.accessToken}`,
         'X-CSRFToken': token,
         'Referer': this.config.baseUrl,
         ...config.headers,
@@ -280,9 +323,15 @@ export class BaseSuperset {
       withCredentials: true,
     });
 
+    if (this.config.accessToken) {
+      protectedApi.defaults.headers.common['Authorization'] = `Bearer ${this.config.accessToken}`;
+    }
+
     // If session cookie exists, add it to the request
     if (sessionCookie) {
-      protectedApi.defaults.headers.common['Cookie'] = `session=${sessionCookie}`;
+      protectedApi.defaults.headers.common['Cookie'] = sessionCookie;
+    } else if (this.config.sessionCookie) {
+      protectedApi.defaults.headers.common['Cookie'] = this.config.sessionCookie;
     }
 
     // Add response interceptor for token expiration handling
@@ -306,10 +355,14 @@ export class BaseSuperset {
             const { token: newToken, sessionCookie: newSessionCookie } = await this.ensureCsrfToken();
             
             // Update request headers
-            originalRequest.headers.Authorization = `Bearer ${this.config.accessToken}`;
+            if (this.config.accessToken) {
+              originalRequest.headers.Authorization = `Bearer ${this.config.accessToken}`;
+            }
             originalRequest.headers['X-CSRFToken'] = newToken;
             if (newSessionCookie) {
-              originalRequest.headers['Cookie'] = `session=${newSessionCookie}`;
+              originalRequest.headers['Cookie'] = newSessionCookie;
+            } else if (this.config.sessionCookie) {
+              originalRequest.headers['Cookie'] = this.config.sessionCookie;
             }
             
             // Retry original request
@@ -327,4 +380,4 @@ export class BaseSuperset {
 
     return protectedApi.request(config);
   }
-} 
+}

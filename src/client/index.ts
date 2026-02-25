@@ -13,6 +13,8 @@ export function initializeSupersetClient(): SupersetClient {
       password: process.env.SUPERSET_PASSWORD,
       accessToken: process.env.SUPERSET_ACCESS_TOKEN,
       accessTokenCommand: process.env.SUPERSET_ACCESS_TOKEN_COMMAND,
+      sessionCookie: process.env.SUPERSET_SESSION_COOKIE,
+      csrfToken: process.env.SUPERSET_CSRF_TOKEN,
       authProvider: process.env.SUPERSET_AUTH_PROVIDER,
     };
     

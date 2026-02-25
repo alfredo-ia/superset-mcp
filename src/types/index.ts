@@ -5,6 +5,8 @@ export interface SupersetConfig {
   password?: string;
   accessToken?: string;
   accessTokenCommand?: string;
+  sessionCookie?: string;
+  csrfToken?: string;
   authProvider?: string; // Authentication provider, default is 'db', options: 'db', 'ldap', 'oauth', etc.
 }
 

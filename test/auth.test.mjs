@@ -11,6 +11,8 @@ class TestSupersetClient extends BaseSuperset {
     return {
       isAuthenticated: this.isAuthenticated,
       accessToken: this.config.accessToken,
+      sessionCookie: this.config.sessionCookie,
+      csrfToken: this.csrfToken,
     };
   }
 }
@@ -52,5 +54,28 @@ test("authenticate usa SUPERSET_ACCESS_TOKEN_COMMAND para obter token", async ()
   const state = client.getState();
   assert.equal(state.isAuthenticated, true);
   assert.equal(state.accessToken, "command-token");
+  assert.equal(loginCalled, false);
+});
+
+test("authenticate aceita SUPERSET_SESSION_COOKIE e SUPERSET_CSRF_TOKEN sem username/password", async () => {
+  const client = new TestSupersetClient({
+    baseUrl: "https://superset.example.com",
+    sessionCookie: "session=abc123",
+    csrfToken: "csrf-xyz",
+  });
+
+  let loginCalled = false;
+  client.setPostHandler(async () => {
+    loginCalled = true;
+    return { data: { access_token: "unexpected" } };
+  });
+
+  await client.authenticate();
+
+  const state = client.getState();
+  assert.equal(state.isAuthenticated, true);
+  assert.equal(state.accessToken, undefined);
+  assert.equal(state.sessionCookie, "session=abc123");
+  assert.equal(state.csrfToken, "csrf-xyz");
   assert.equal(loginCalled, false);
 });

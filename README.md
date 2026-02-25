@@ -19,7 +19,7 @@ A Model Context Protocol (MCP) server for managing Apache Superset datasets, met
 
 - Node.js 18+ 
 - Access to an Apache Superset instance
-- Valid Superset credentials (username/password or access token)
+- Valid Superset credentials (username/password, access token, or session cookie)
 
 ## 🛠️ Installation
 
@@ -78,6 +78,19 @@ Notes:
 - `SUPERSET_ACCESS_TOKEN` now works without requiring username/password.
 - `SUPERSET_ACCESS_TOKEN_COMMAND` is executed whenever the server needs a token.
 - If the command output starts with `Bearer `, the prefix is stripped automatically.
+
+**Alternative: Using Browser Session Cookie + CSRF Token**
+```json
+"env": {
+  "SUPERSET_BASE_URL": "your-superset-url",
+  "SUPERSET_SESSION_COOKIE": "session=<cookie-value-or-full-cookie-header>",
+  "SUPERSET_CSRF_TOKEN": "<csrf-token>"
+}
+```
+
+Notes:
+- This mode is useful when your Superset is behind SSO and does not expose API bearer tokens.
+- Session cookies expire; when they expire, refresh values from an authenticated browser session.
 
 ## 🔧 Available Tools
 
