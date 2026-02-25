@@ -54,7 +54,7 @@ Configure your Superset connection by updating the `env` section in the MCP conf
 "env": {
   "SUPERSET_BASE_URL": "your-superset-url",
   "SUPERSET_USERNAME": "your_username",
-  "SUPERSET_PASSWORD": "your_password",
+  "SUPERSET_PASSWORD": "your_password"
 }
 ```
 
@@ -65,6 +65,19 @@ Configure your Superset connection by updating the `env` section in the MCP conf
   "SUPERSET_ACCESS_TOKEN": "your_access_token"
 }
 ```
+
+**Alternative: Using Access Token Command (recommended for Azure SSO/OAuth)**
+```json
+"env": {
+  "SUPERSET_BASE_URL": "your-superset-url",
+  "SUPERSET_ACCESS_TOKEN_COMMAND": "az account get-access-token --resource api://<your-superset-app-id-uri> --query accessToken -o tsv"
+}
+```
+
+Notes:
+- `SUPERSET_ACCESS_TOKEN` now works without requiring username/password.
+- `SUPERSET_ACCESS_TOKEN_COMMAND` is executed whenever the server needs a token.
+- If the command output starts with `Bearer `, the prefix is stripped automatically.
 
 ## 🔧 Available Tools
 

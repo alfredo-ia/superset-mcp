@@ -4,6 +4,7 @@ export interface SupersetConfig {
   username?: string;
   password?: string;
   accessToken?: string;
+  accessTokenCommand?: string;
   authProvider?: string; // Authentication provider, default is 'db', options: 'db', 'ldap', 'oauth', etc.
 }
 

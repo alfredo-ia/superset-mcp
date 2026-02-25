@@ -1,6 +1,10 @@
 import axios, { AxiosInstance } from "axios";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
 import { SupersetConfig, CsrfTokenResponse } from "../types/index.js";
 import { getErrorMessage, formatAuthError } from "../utils/error.js";
+
+const execAsync = promisify(exec);
 
 /**
  * Base Superset API client that handles authentication and CSRF tokens
@@ -10,11 +14,17 @@ export class BaseSuperset {
   protected config: SupersetConfig;
   protected isAuthenticated = false;
   protected csrfToken?: string;
+  private accessTokenSource: 'static' | 'command' | 'login' | null = null;
   private isRefreshing = false; // Prevent concurrent token refresh
   private refreshPromise?: Promise<void>; // Store refresh promise for reuse
 
   constructor(config: SupersetConfig) {
     this.config = config;
+    if (config.accessToken?.trim()) {
+      this.config.accessToken = this.normalizeAccessToken(config.accessToken);
+      this.accessTokenSource = 'static';
+    }
+
     this.api = axios.create({
       baseURL: config.baseUrl,
       timeout: 120000,
@@ -42,6 +52,36 @@ export class BaseSuperset {
     });
 
     this.setupInterceptors();
+  }
+
+  private normalizeAccessToken(rawToken: string): string {
+    const token = rawToken.trim();
+    if (!token) {
+      throw new Error("Access token is empty");
+    }
+    return token.startsWith('Bearer ') ? token.slice(7).trim() : token;
+  }
+
+  private async loadAccessTokenFromCommand(): Promise<string | undefined> {
+    const tokenCommand = this.config.accessTokenCommand?.trim();
+    if (!tokenCommand) {
+      return undefined;
+    }
+
+    try {
+      const { stdout } = await execAsync(tokenCommand, {
+        timeout: 30000,
+        maxBuffer: 1024 * 1024,
+      });
+
+      const token = this.normalizeAccessToken(stdout);
+      if (!token) {
+        throw new Error("Access token command returned empty output");
+      }
+      return token;
+    } catch (error) {
+      throw new Error(`Failed to execute SUPERSET_ACCESS_TOKEN_COMMAND: ${getErrorMessage(error)}`);
+    }
   }
 
   private setupInterceptors(): void {
@@ -127,6 +167,9 @@ export class BaseSuperset {
     // Clear current authentication state
     this.isAuthenticated = false;
     this.csrfToken = undefined;
+    if (this.accessTokenSource !== 'static') {
+      this.config.accessToken = undefined;
+    }
     
     // Re-authenticate
     await this.authenticate();
@@ -135,13 +178,30 @@ export class BaseSuperset {
   // Clear authentication state
   private clearAuthState(): void {
     this.isAuthenticated = false;
-    this.config.accessToken = undefined;
     this.csrfToken = undefined;
+
+    if (this.accessTokenSource !== 'static') {
+      this.config.accessToken = undefined;
+      this.accessTokenSource = null;
+    }
   }
 
   // Authentication login
   async authenticate(): Promise<void> {
     if (this.config.accessToken && this.isAuthenticated) {
+      return;
+    }
+
+    if (this.config.accessToken && this.accessTokenSource === 'static') {
+      this.isAuthenticated = true;
+      return;
+    }
+
+    const commandAccessToken = await this.loadAccessTokenFromCommand();
+    if (commandAccessToken) {
+      this.config.accessToken = commandAccessToken;
+      this.accessTokenSource = 'command';
+      this.isAuthenticated = true;
       return;
     }
 
@@ -157,7 +217,8 @@ export class BaseSuperset {
         refresh: true,
       });
 
-      this.config.accessToken = response.data.access_token;
+      this.config.accessToken = this.normalizeAccessToken(response.data.access_token);
+      this.accessTokenSource = 'login';
       this.isAuthenticated = true;
     } catch (error) {
       const errorMessage = formatAuthError(error);
