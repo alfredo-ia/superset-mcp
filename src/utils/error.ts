@@ -57,6 +57,23 @@ export function getErrorMessage(error: unknown): string {
     // Try to get detailed error information
     const response = error.response;
     if (response) {
+      if (response.status === 401) {
+        const serverMessage =
+          typeof response.data === "string"
+            ? response.data
+            : response.data && typeof response.data === "object" && "message" in response.data
+              ? formatObjectForDisplay(response.data.message)
+              : "";
+
+        const baseMessage =
+          "401 Unauthorized: Invalid or expired session cookie. Refresh SUPERSET_SESSION_COOKIE (and SUPERSET_CSRF_TOKEN when needed).";
+        return serverMessage ? `${baseMessage}\nServer message: ${serverMessage}` : baseMessage;
+      }
+
+      if (response.status === 403) {
+        return "403 Forbidden: Access denied for this Superset session. Check permissions for the authenticated user/session.";
+      }
+
       // Handle different response content types
       const contentType = response.headers['content-type'] || '';
       

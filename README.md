@@ -23,8 +23,6 @@ Um servidor Model Context Protocol (MCP) para gerenciar datasets, métricas e co
 
 ## 🛠️ Instalação
 
-### Uso com Cursor ou Claude Desktop
-
 #### 1. Adicione na configuração de MCP
 Adicione a configuração abaixo no arquivo de configuração de MCP:
 
@@ -35,7 +33,7 @@ Adicione a configuração abaixo no arquivo de configuração de MCP:
       "command": "npx",
       "args": [
         "-y",
-        "alfredo-superset-mcp@0.0.2"
+        "alfredo-superset-mcp@latest"
       ],
       "env": {
         "SUPERSET_BASE_URL": "",
@@ -54,7 +52,7 @@ Configure a conexão com o Superset atualizando a seção `env`:
 "env": {
   "SUPERSET_BASE_URL": "https://seu-superset.exemplo.com",
   "SUPERSET_SESSION_COOKIE": "<valor-da-session>",
-  "SUPERSET_CSRF_TOKEN": "<csrf-token>"
+  "SUPERSET_CSRF_TOKEN": "<csrf-token-opcional>"
 }
 ```
 
@@ -70,7 +68,9 @@ Configure a conexão com o Superset atualizando a seção `env`:
 
 Observações:
 - Este MCP usa autenticação **somente por cookie de sessão**.
-- O valor recomendado para `SUPERSET_SESSION_COOKIE` é apenas o conteúdo da cookie `session` (sem `session=`).
+- `SUPERSET_CSRF_TOKEN` é **opcional**.
+- Se `SUPERSET_CSRF_TOKEN` não for informado, o MCP tenta obter o token automaticamente via API do Superset.
+- Em ambientes com proxy/WAF/políticas mais restritivas, pode ser necessário informar `SUPERSET_CSRF_TOKEN` manualmente.
 - Cookies de sessão expiram; quando isso acontecer, atualize os valores a partir de uma sessão autenticada no navegador.
 
 ## 🔧 Ferramentas disponíveis
