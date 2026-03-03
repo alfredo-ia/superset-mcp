@@ -1,5 +1,7 @@
 # Servidor MCP do Superset
 
+> Este projeto é um **fork** mantido pela organização **alfredo-ia** a partir do repositório original `winding2020/superset-mcp`.
+
 Um servidor Model Context Protocol (MCP) para gerenciar datasets, métricas e consultas SQL do Apache Superset.
 
 ## 🚀 Funcionalidades
@@ -33,7 +35,7 @@ Adicione a configuração abaixo no arquivo de configuração de MCP:
       "command": "npx",
       "args": [
         "-y",
-        "superset-mcp"
+        "alfredo-superset-mcp@0.0.2"
       ],
       "env": {
         "SUPERSET_BASE_URL": "",
@@ -45,20 +47,30 @@ Adicione a configuração abaixo no arquivo de configuração de MCP:
 }
 ```
 
-#### 2. Variáveis de ambiente
+#### 2. Configure as variáveis de ambiente
 Configure a conexão com o Superset atualizando a seção `env`:
 
 ```json
 "env": {
-  "SUPERSET_BASE_URL": "your-superset-url",
-  "SUPERSET_SESSION_COOKIE": "session=<cookie-value-or-full-cookie-header>",
+  "SUPERSET_BASE_URL": "https://seu-superset.exemplo.com",
+  "SUPERSET_SESSION_COOKIE": "<valor-da-session>",
   "SUPERSET_CSRF_TOKEN": "<csrf-token>"
 }
 ```
 
+#### 3. Como obter o `SUPERSET_SESSION_COOKIE` no navegador (F12)
+1. Abra o Superset no navegador e faça login normalmente.
+2. Com o Superset aberto, pressione `F12` para abrir o DevTools (Inspecionar elemento).
+3. Vá para a aba `Application`.
+4. No menu lateral, clique em `Cookies`.
+5. Clique no item do domínio/URL do seu Superset.
+6. Procure a linha com `Name = session`.
+7. Copie o valor da coluna `Value`.
+8. Use **somente esse valor** em `SUPERSET_SESSION_COOKIE` (sem `session=`).
+
 Observações:
 - Este MCP usa autenticação **somente por cookie de sessão**.
-- Se o valor do cookie não incluir `session=`, o servidor normaliza automaticamente.
+- O valor recomendado para `SUPERSET_SESSION_COOKIE` é apenas o conteúdo da cookie `session` (sem `session=`).
 - Cookies de sessão expiram; quando isso acontecer, atualize os valores a partir de uma sessão autenticada no navegador.
 
 ## 🔧 Ferramentas disponíveis

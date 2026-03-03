@@ -1,6 +1,6 @@
 {
-  "name": "superset-mcp",
-  "version": "1.7.0",
+  "name": "alfredo-superset-mcp",
+  "version": "0.0.2",
   "description": "MCP server for reading and editing Apache Superset dataset data",
   "type": "module",
   "main": "build/index.js",
@@ -30,6 +30,9 @@
     "README.md",
     "README_zh.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "mcp",
     "superset",
@@ -37,7 +40,14 @@
     "apache-superset",
     "model-context-protocol"
   ],
-  "homepage": "https://github.com/winding2020/superset-mcp",
+  "homepage": "https://github.com/alfredo-ia/superset-mcp",
   "author": "Winding2020",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alfredo-ia/superset-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alfredo-ia/superset-mcp/issues"
+  }
 }
