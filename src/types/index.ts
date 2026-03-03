@@ -1,13 +1,8 @@
 // Superset client configuration interface
 export interface SupersetConfig {
   baseUrl: string;
-  username?: string;
-  password?: string;
-  accessToken?: string;
-  accessTokenCommand?: string;
   sessionCookie?: string;
   csrfToken?: string;
-  authProvider?: string; // Authentication provider, default is 'db', options: 'db', 'ldap', 'oauth', etc.
 }
 
 // Dataset data structure

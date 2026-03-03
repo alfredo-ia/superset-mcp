@@ -9,13 +9,8 @@ export function initializeSupersetClient(): SupersetClient {
   if (!supersetClient) {
     const config: SupersetConfig = {
       baseUrl: process.env.SUPERSET_BASE_URL || 'http://localhost:8088',
-      username: process.env.SUPERSET_USERNAME,
-      password: process.env.SUPERSET_PASSWORD,
-      accessToken: process.env.SUPERSET_ACCESS_TOKEN,
-      accessTokenCommand: process.env.SUPERSET_ACCESS_TOKEN_COMMAND,
       sessionCookie: process.env.SUPERSET_SESSION_COOKIE,
       csrfToken: process.env.SUPERSET_CSRF_TOKEN,
-      authProvider: process.env.SUPERSET_AUTH_PROVIDER,
     };
     
     supersetClient = new SupersetClient(config);

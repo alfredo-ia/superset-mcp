@@ -155,8 +155,8 @@ export const chartToolDefinitions = [
         },
         include_params_details: {
           type: "boolean",
-          description: "Whether to include detailed breakdown of visualization parameters (default: false)",
-          default: false,
+          description: "Whether to include detailed breakdown of visualization parameters (default: true)",
+          default: true,
         },
         include_ownership: {
           type: "boolean",
@@ -466,7 +466,7 @@ export async function handleChartTool(toolName: string, args: any) {
       case "get_current_chart_config": {
         const { 
           chart_id, 
-          include_params_details = false,
+          include_params_details = true,
           include_ownership = false,
           include_relationships = true,
           include_query_context = true,
@@ -646,8 +646,7 @@ export async function handleChartTool(toolName: string, args: any) {
           }
         } else if (chart.params && !include_params_details) {
           responseText += `VISUALIZATION PARAMETERS\n`;
-          responseText += `Parameters exist but details hidden (use include_params_details: true to show)\n`;
-          responseText += `Parameters length: ${chart.params.length} characters\n\n`;
+          responseText += `${chart.params}\n\n`;
         }
         
         // Summary

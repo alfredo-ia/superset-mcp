@@ -1,30 +1,30 @@
-# Superset MCP Server
+# Servidor MCP do Superset
 
-A Model Context Protocol (MCP) server for managing Apache Superset datasets, metrics, and SQL queries.
+Um servidor Model Context Protocol (MCP) para gerenciar datasets, métricas e consultas SQL do Apache Superset.
 
-## 🚀 Features
+## 🚀 Funcionalidades
 
-- **Dataset Management**: Full CRUD operations for Superset datasets
-- **Metrics Management**: Create, update, and manage dataset metrics
-- **Calculated Columns**: Create and manage calculated columns for datasets
-- **Chart Management**: View and modify chart visualization parameters and filters
-- **Dashboard Operations**: Access dashboard information, charts, and filters
-- **SQL Query Execution**: Execute SQL queries directly through Superset
-- **Database Integration**: List and manage database connections
-- **Resource Access**: Browse datasets, databases, and metrics through MCP resources
+- **Gestão de Datasets**: Operações completas de CRUD para datasets do Superset
+- **Gestão de Métricas**: Criar, atualizar e gerenciar métricas de datasets
+- **Colunas Calculadas**: Criar e gerenciar colunas calculadas para datasets
+- **Gestão de Gráficos**: Visualizar e modificar parâmetros de visualização e filtros
+- **Operações de Dashboards**: Acessar informações de dashboards, gráficos e filtros
+- **Execução de SQL**: Executar consultas SQL diretamente pelo Superset
+- **Integração com Banco de Dados**: Listar e gerenciar conexões de banco
+- **Acesso a Recursos**: Navegar por datasets, bancos e métricas via recursos MCP
 
-## 📋 Prerequisites
+## 📋 Pré-requisitos
 
-- Node.js 18+ 
-- Access to an Apache Superset instance
-- Valid Superset credentials (username/password, access token, or session cookie)
+- Node.js 18+
+- Acesso a uma instância do Apache Superset
+- Cookie de sessão web válido do Superset
 
-## 🛠️ Installation
+## 🛠️ Instalação
 
-### Using with Cursor or Claude Desktop
+### Uso com Cursor ou Claude Desktop
 
-#### 1. Add to MCP Configuration
-Add the following configuration to your MCP settings file:
+#### 1. Adicione na configuração de MCP
+Adicione a configuração abaixo no arquivo de configuração de MCP:
 
 ```json
 {
@@ -37,37 +37,17 @@ Add the following configuration to your MCP settings file:
       ],
       "env": {
         "SUPERSET_BASE_URL": "",
-        "SUPERSET_USERNAME": "",
-        "SUPERSET_PASSWORD": ""
+        "SUPERSET_SESSION_COOKIE": "",
+        "SUPERSET_CSRF_TOKEN": ""
       }
     }
   }
 }
 ```
 
-#### 2. Environment Variables
-Configure your Superset connection by updating the `env` section in the MCP configuration:
+#### 2. Variáveis de ambiente
+Configure a conexão com o Superset atualizando a seção `env`:
 
-```json
-"env": {
-  "SUPERSET_BASE_URL": "your-superset-url",
-  "SUPERSET_USERNAME": "your_username",
-  "SUPERSET_PASSWORD": "your_password"
-}
-```
-
-**Alternative: Using Access Token**
-```json
-"env": {
-  "SUPERSET_BASE_URL": "your-superset-url",
-  "SUPERSET_ACCESS_TOKEN": "your_access_token"
-}
-```
-
-Notes:
-- `SUPERSET_ACCESS_TOKEN` now works without requiring username/password.
-
-**Alternative: Using Browser Session Cookie + CSRF Token**
 ```json
 "env": {
   "SUPERSET_BASE_URL": "your-superset-url",
@@ -76,95 +56,95 @@ Notes:
 }
 ```
 
-Notes:
-- This mode is useful when your Superset is behind SSO and does not expose API bearer tokens.
-- Session cookies expire; when they expire, refresh values from an authenticated browser session.
+Observações:
+- Este MCP usa autenticação **somente por cookie de sessão**.
+- Se o valor do cookie não incluir `session=`, o servidor normaliza automaticamente.
+- Cookies de sessão expiram; quando isso acontecer, atualize os valores a partir de uma sessão autenticada no navegador.
 
-## 🔧 Available Tools
+## 🔧 Ferramentas disponíveis
 
-### Dataset Operations
-| Tool | Description |
+### Operações de Datasets
+| Ferramenta | Descrição |
 |------|-------------|
-| `list_datasets` | Get paginated list of all datasets with filtering and sorting |
-| `get_dataset` | Get detailed information for a specific dataset |
-| `create_dataset` | Create a new dataset (physical or virtual with SQL) |
-| `update_dataset` | Update existing dataset properties |
-| `delete_dataset` | Delete a dataset |
-| `refresh_dataset_schema` | Refresh dataset schema from source database |
-| `find_and_replace_in_sql` | Find and replace text in virtual dataset SQL |
+| `list_datasets` | Retorna uma lista paginada de datasets com filtros e ordenação |
+| `get_dataset` | Retorna informações detalhadas de um dataset específico |
+| `create_dataset` | Cria um novo dataset (físico ou virtual com SQL) |
+| `update_dataset` | Atualiza propriedades de um dataset existente |
+| `delete_dataset` | Remove um dataset |
+| `refresh_dataset_schema` | Atualiza o schema do dataset a partir da origem |
+| `find_and_replace_in_sql` | Localiza e substitui texto no SQL de dataset virtual |
 
-### Metrics Operations
-| Tool | Description |
+### Operações de Métricas
+| Ferramenta | Descrição |
 |------|-------------|
-| `get_dataset_metrics` | Get all metrics for a dataset |
-| `create_dataset_metric` | Create a new metric with SQL expression |
-| `update_dataset_metric` | Update existing metric properties |
-| `delete_dataset_metric` | Delete a metric |
+| `get_dataset_metrics` | Retorna todas as métricas de um dataset |
+| `create_dataset_metric` | Cria uma nova métrica com expressão SQL |
+| `update_dataset_metric` | Atualiza propriedades de uma métrica existente |
+| `delete_dataset_metric` | Remove uma métrica |
 
-### Calculated Columns Operations
-| Tool | Description |
+### Operações de Colunas Calculadas
+| Ferramenta | Descrição |
 |------|-------------|
-| `get_dataset_columns` | Get column information (including calculated columns) |
-| `create_calculated_column` | Create a new calculated column with SQL expression |
-| `update_calculated_column` | Update existing calculated column |
-| `delete_calculated_column` | Delete a calculated column |
+| `get_dataset_columns` | Retorna informações de colunas (incluindo calculadas) |
+| `create_calculated_column` | Cria uma nova coluna calculada com expressão SQL |
+| `update_calculated_column` | Atualiza uma coluna calculada existente |
+| `delete_calculated_column` | Remove uma coluna calculada |
 
-### Chart Operations
-| Tool | Description |
+### Operações de Gráficos
+| Ferramenta | Descrição |
 |------|-------------|
-| `list_charts` | Get paginated list of all charts with filtering and sorting |
-| `create_chart` | Create a new chart; for most viz types you should first call `get_chart_params` to obtain the correct params schema |
-| `get_chart_params` | Get required parameters format for chart visualization types |
-| `get_current_chart_config` | Get current chart configuration details (viz params, relationships, ownership, query context) |
-| `update_chart` | Update chart properties including metadata, datasource, and visualization parameters |
-| `get_chart_filters` | Get current data filters applied to a chart |
-| `set_chart_filters` | Set data filters for a chart (permanently updates the chart) |
+| `list_charts` | Retorna uma lista paginada de gráficos com filtros e ordenação |
+| `create_chart` | Cria um novo gráfico; para a maioria dos tipos, chame antes `get_chart_params` para obter o schema correto |
+| `get_chart_params` | Retorna o formato de parâmetros necessário para tipos de visualização |
+| `get_current_chart_config` | Retorna detalhes da configuração atual do gráfico (parâmetros, relacionamentos, ownership, query context) |
+| `update_chart` | Atualiza propriedades do gráfico, incluindo metadados, datasource e parâmetros |
+| `get_chart_filters` | Retorna os filtros de dados atualmente aplicados ao gráfico |
+| `set_chart_filters` | Define filtros de dados para o gráfico (atualiza permanentemente) |
 
-### Dashboard Operations
-| Tool | Description |
+### Operações de Dashboards
+| Ferramenta | Descrição |
 |------|-------------|
-| `list_dashboards` | Get paginated list of all dashboards with filtering and sorting |
-| `get_dashboard_charts` | Get all charts in a specific dashboard with their information |
-| `get_dashboard_filters` | Get dashboard's filter configuration (native filters, global filters) |
-| `get_dashboard_chart_query_context` | Get complete query context for a chart in dashboard (dataset ID, used metrics with SQL expressions, calculated columns, applied filters) |
-| `get_dashboard_config` | Get dashboard details and embedded configuration |
-| `update_dashboard_config` | Update dashboard properties and/or embedded configuration |
-| `add_chart_to_dashboard` | Add an existing chart to a dashboard and place it in the layout |
-| `remove_chart_from_dashboard` | Remove a chart from a dashboard and clean up its layout |
+| `list_dashboards` | Retorna uma lista paginada de dashboards com filtros e ordenação |
+| `get_dashboard_charts` | Retorna todos os gráficos de um dashboard específico com suas informações |
+| `get_dashboard_filters` | Retorna a configuração de filtros do dashboard (filtros nativos e globais) |
+| `get_dashboard_chart_query_context` | Retorna o query context completo de um gráfico no dashboard (dataset, métricas, colunas calculadas, filtros) |
+| `get_dashboard_config` | Retorna detalhes e configuração de embed do dashboard |
+| `update_dashboard_config` | Atualiza propriedades e/ou configuração de embed do dashboard |
+| `add_chart_to_dashboard` | Adiciona um gráfico existente ao dashboard e posiciona no layout |
+| `remove_chart_from_dashboard` | Remove um gráfico do dashboard e limpa o layout |
 
-### SQL Operations
-| Tool | Description |
+### Operações SQL
+| Ferramenta | Descrição |
 |------|-------------|
-| `execute_sql` | Execute SQL queries with result limiting and data display |
+| `execute_sql` | Executa consultas SQL com limite de resultados e exibição de dados |
 
-### Database Operations
-| Tool | Description |
+### Operações de Banco de Dados
+| Ferramenta | Descrição |
 |------|-------------|
-| `list_databases` | Get all configured database connections |
+| `list_databases` | Retorna todas as conexões de banco de dados configuradas |
 
-## 📚 Resources
+## 📚 Recursos
 
-Access read-only overviews through MCP resources:
+Acesse visões gerais somente leitura por meio dos recursos MCP:
 
-- `superset://datasets` - Overview of all datasets
-- `superset://databases` - List of database connections  
+- `superset://datasets` - Visão geral de todos os datasets
+- `superset://databases` - Lista de conexões de banco de dados
 
+## Exemplos de prompts
 
-## Prompt examples
+Use estes prompts naturais com seu assistente habilitado para MCP; ele escolherá as ferramentas e argumentos corretos.
 
-Use these natural prompts with your MCP-enabled assistant; it will pick the right tools and arguments.
+- Listar datasets
+  - "Mostre os 10 primeiros datasets, ordenados pelos mais recentemente alterados. Inclua apenas id e table_name."
 
-- List datasets
-  - "Show the first 10 datasets, most recently changed first. Only include id and table_name."
+- Criar um gráfico
+  - "Crie um gráfico de tabela simples chamado 'Sample Table' usando o dataset 12."
 
-- Create a chart
-  - "Create a simple table chart called 'Sample Table' using dataset 12."
+- Atualizar um gráfico
+  - "Altere o gráfico 42 para um gráfico de barras agrupado por país usando SUM(value)."
 
-- Update a chart
-  - "Change chart 42 to a bar chart grouped by country and using SUM(value)."
+- Query context de dashboard
+  - "No dashboard 'sales-kpi', mostre o query context completo do gráfico 101."
 
-- Dashboard query context
-  - "On the 'sales-kpi' dashboard, show the full query context for chart 101."
-
-- Run SQL
-  - "On database 3, fetch the 10 most recently created users, returning only id and name."
+- Executar SQL
+  - "No banco 3, busque os 10 usuários criados mais recentemente, retornando apenas id e name."

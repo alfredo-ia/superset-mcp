@@ -279,11 +279,11 @@ export function formatAuthError(error: unknown): string {
       errorDetails += `Status: ${response.status} ${response.statusText}\n\n`;
       
       if (response.status === 401) {
-        errorDetails += `Reason: Invalid username or password\n`;
-        errorDetails += `Solution: Please check your credentials in the MCP configuration\n`;
+        errorDetails += `Reason: Invalid or expired session cookie\n`;
+        errorDetails += `Solution: Refresh SUPERSET_SESSION_COOKIE (and SUPERSET_CSRF_TOKEN when needed)\n`;
       } else if (response.status === 403) {
         errorDetails += `Reason: Access forbidden\n`;
-        errorDetails += `Solution: Your account may not have sufficient permissions\n`;
+        errorDetails += `Solution: Check Superset permissions for the authenticated session\n`;
       } else if (response.status === 500) {
         errorDetails += `Reason: Server error during authentication\n`;
         errorDetails += `Solution: Please check if Superset is running correctly\n`;

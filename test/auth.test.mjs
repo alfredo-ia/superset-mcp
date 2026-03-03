@@ -10,54 +10,24 @@ class TestSupersetClient extends BaseSuperset {
   getState() {
     return {
       isAuthenticated: this.isAuthenticated,
-      accessToken: this.config.accessToken,
       sessionCookie: this.config.sessionCookie,
       csrfToken: this.csrfToken,
     };
   }
 }
 
-test("authenticate aceita SUPERSET_ACCESS_TOKEN sem username/password", async () => {
+test("authenticate exige SUPERSET_SESSION_COOKIE quando não configurado", async () => {
   const client = new TestSupersetClient({
     baseUrl: "https://superset.example.com",
-    accessToken: "token-from-env",
   });
 
-  let loginCalled = false;
-  client.setPostHandler(async () => {
-    loginCalled = true;
-    return { data: { access_token: "unexpected" } };
-  });
-
-  await client.authenticate();
-
-  const state = client.getState();
-  assert.equal(state.isAuthenticated, true);
-  assert.equal(state.accessToken, "token-from-env");
-  assert.equal(loginCalled, false);
+  await assert.rejects(
+    client.authenticate(),
+    /SUPERSET_SESSION_COOKIE required/,
+  );
 });
 
-test("authenticate usa SUPERSET_ACCESS_TOKEN_COMMAND para obter token", async () => {
-  const client = new TestSupersetClient({
-    baseUrl: "https://superset.example.com",
-    accessTokenCommand: "node -e \"process.stdout.write('command-token')\"",
-  });
-
-  let loginCalled = false;
-  client.setPostHandler(async () => {
-    loginCalled = true;
-    return { data: { access_token: "unexpected" } };
-  });
-
-  await client.authenticate();
-
-  const state = client.getState();
-  assert.equal(state.isAuthenticated, true);
-  assert.equal(state.accessToken, "command-token");
-  assert.equal(loginCalled, false);
-});
-
-test("authenticate aceita SUPERSET_SESSION_COOKIE e SUPERSET_CSRF_TOKEN sem username/password", async () => {
+test("authenticate aceita SUPERSET_SESSION_COOKIE e SUPERSET_CSRF_TOKEN sem exigir outras credenciais", async () => {
   const client = new TestSupersetClient({
     baseUrl: "https://superset.example.com",
     sessionCookie: "session=abc123",
@@ -74,8 +44,20 @@ test("authenticate aceita SUPERSET_SESSION_COOKIE e SUPERSET_CSRF_TOKEN sem user
 
   const state = client.getState();
   assert.equal(state.isAuthenticated, true);
-  assert.equal(state.accessToken, undefined);
   assert.equal(state.sessionCookie, "session=abc123");
   assert.equal(state.csrfToken, "csrf-xyz");
   assert.equal(loginCalled, false);
+});
+
+test("authenticate normaliza SUPERSET_SESSION_COOKIE sem prefixo session=", async () => {
+  const client = new TestSupersetClient({
+    baseUrl: "https://superset.example.com",
+    sessionCookie: "abc123",
+  });
+
+  await client.authenticate();
+
+  const state = client.getState();
+  assert.equal(state.isAuthenticated, true);
+  assert.equal(state.sessionCookie, "session=abc123");
 });
